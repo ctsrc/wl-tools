@@ -293,6 +293,26 @@ mod test {
         Ant,
     }
 
+    #[derive(Debug, PartialEq)]
+    pub enum ExampleWords7 {
+        Ant,
+        Art,
+        I,
+        Main,
+        Man,
+        Mane,
+        Mango,
+        Mare,
+        More,
+        XRAM,
+        XRay,
+        Zebra,
+        Zero,
+        Zinc,
+        Zombie,
+        Zoo,
+    }
+
     /// A well-formed example empty wordlist
     /// Suitable for iterative char search (although it would be rather pointless in this case :P)
     pub const EXAMPLE_WORDLIST_EMPTY: WordCharTreeRootNode<()> =
@@ -502,6 +522,326 @@ mod test {
         }],
     };
 
+    /// A well-formed example wordlist
+    /// Not suitable for iterative char search
+    pub const EXAMPLE_WORDLIST_7: WordCharTreeRootNode<ExampleWords7> = WordCharTreeRootNode {
+        edges: &[
+            WordCharTreeEdge {
+                char_lowercase: 'a',
+                idx_range: 0..=1,
+                child_node: WordCharTreeNode {
+                    word: None,
+                    edges: &[
+                        WordCharTreeEdge {
+                            char_lowercase: 'n',
+                            idx_range: 0..=0,
+                            child_node: WordCharTreeNode {
+                                word: None,
+                                edges: &[WordCharTreeEdge {
+                                    char_lowercase: 't',
+                                    idx_range: 0..=0,
+                                    child_node: WordCharTreeNode {
+                                        word: Some(ExampleWords7::Ant),
+                                        edges: &[],
+                                    },
+                                }],
+                            },
+                        },
+                        WordCharTreeEdge {
+                            char_lowercase: 'r',
+                            idx_range: 1..=1,
+                            child_node: WordCharTreeNode {
+                                word: None,
+                                edges: &[WordCharTreeEdge {
+                                    char_lowercase: 't',
+                                    idx_range: 1..=1,
+                                    child_node: WordCharTreeNode {
+                                        word: Some(ExampleWords7::Art),
+                                        edges: &[],
+                                    },
+                                }],
+                            },
+                        },
+                    ],
+                },
+            },
+            WordCharTreeEdge {
+                char_lowercase: 'i',
+                idx_range: 2..=2,
+                child_node: WordCharTreeNode {
+                    word: Some(ExampleWords7::I),
+                    edges: &[],
+                },
+            },
+            WordCharTreeEdge {
+                char_lowercase: 'm',
+                idx_range: 3..=8,
+                child_node: WordCharTreeNode {
+                    word: None,
+                    edges: &[
+                        WordCharTreeEdge {
+                            char_lowercase: 'a',
+                            idx_range: 3..=7,
+                            child_node: WordCharTreeNode {
+                                word: None,
+                                edges: &[
+                                    WordCharTreeEdge {
+                                        char_lowercase: 'i',
+                                        idx_range: 3..=3,
+                                        child_node: WordCharTreeNode {
+                                            word: None,
+                                            edges: &[WordCharTreeEdge {
+                                                char_lowercase: 'n',
+                                                idx_range: 3..=3,
+                                                child_node: WordCharTreeNode {
+                                                    word: Some(ExampleWords7::Main),
+                                                    edges: &[],
+                                                },
+                                            }],
+                                        },
+                                    },
+                                    WordCharTreeEdge {
+                                        char_lowercase: 'n',
+                                        idx_range: 4..=6,
+                                        child_node: WordCharTreeNode {
+                                            word: Some(ExampleWords7::Man),
+                                            edges: &[
+                                                WordCharTreeEdge {
+                                                    char_lowercase: 'e',
+                                                    idx_range: 5..=5,
+                                                    child_node: WordCharTreeNode {
+                                                        word: Some(ExampleWords7::Mane),
+                                                        edges: &[],
+                                                    },
+                                                },
+                                                WordCharTreeEdge {
+                                                    char_lowercase: 'g',
+                                                    idx_range: 6..=6,
+                                                    child_node: WordCharTreeNode {
+                                                        word: None,
+                                                        edges: &[WordCharTreeEdge {
+                                                            char_lowercase: 'o',
+                                                            idx_range: 6..=6,
+                                                            child_node: WordCharTreeNode {
+                                                                word: Some(ExampleWords7::Mango),
+                                                                edges: &[],
+                                                            },
+                                                        }],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    WordCharTreeEdge {
+                                        char_lowercase: 'r',
+                                        idx_range: 7..=7,
+                                        child_node: WordCharTreeNode {
+                                            word: None,
+                                            edges: &[WordCharTreeEdge {
+                                                char_lowercase: 'e',
+                                                idx_range: 7..=7,
+                                                child_node: WordCharTreeNode {
+                                                    word: Some(ExampleWords7::Mare),
+                                                    edges: &[],
+                                                },
+                                            }],
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                        WordCharTreeEdge {
+                            char_lowercase: 'o',
+                            idx_range: 8..=8,
+                            child_node: WordCharTreeNode {
+                                word: None,
+                                edges: &[WordCharTreeEdge {
+                                    char_lowercase: 'r',
+                                    idx_range: 8..=8,
+                                    child_node: WordCharTreeNode {
+                                        word: None,
+                                        edges: &[WordCharTreeEdge {
+                                            char_lowercase: 'e',
+                                            idx_range: 8..=8,
+                                            child_node: WordCharTreeNode {
+                                                word: Some(ExampleWords7::More),
+                                                edges: &[],
+                                            },
+                                        }],
+                                    },
+                                }],
+                            },
+                        },
+                    ],
+                },
+            },
+            WordCharTreeEdge {
+                char_lowercase: 'x',
+                idx_range: 9..=10,
+                child_node: WordCharTreeNode {
+                    word: None,
+                    edges: &[WordCharTreeEdge {
+                        char_lowercase: 'r',
+                        idx_range: 9..=10,
+                        child_node: WordCharTreeNode {
+                            word: None,
+                            edges: &[WordCharTreeEdge {
+                                char_lowercase: 'a',
+                                idx_range: 9..=10,
+                                child_node: WordCharTreeNode {
+                                    word: None,
+                                    edges: &[
+                                        WordCharTreeEdge {
+                                            char_lowercase: 'm',
+                                            idx_range: 9..=9,
+                                            child_node: WordCharTreeNode {
+                                                word: Some(ExampleWords7::XRAM),
+                                                edges: &[],
+                                            },
+                                        },
+                                        WordCharTreeEdge {
+                                            char_lowercase: 'y',
+                                            idx_range: 10..=10,
+                                            child_node: WordCharTreeNode {
+                                                word: Some(ExampleWords7::XRay),
+                                                edges: &[],
+                                            },
+                                        },
+                                    ],
+                                },
+                            }],
+                        },
+                    }],
+                },
+            },
+            WordCharTreeEdge {
+                char_lowercase: 'z',
+                idx_range: 11..=15,
+                child_node: WordCharTreeNode {
+                    word: None,
+                    edges: &[
+                        WordCharTreeEdge {
+                            char_lowercase: 'e',
+                            idx_range: 11..=12,
+                            child_node: WordCharTreeNode {
+                                word: None,
+                                edges: &[
+                                    WordCharTreeEdge {
+                                        char_lowercase: 'b',
+                                        idx_range: 11..=11,
+                                        child_node: WordCharTreeNode {
+                                            word: None,
+                                            edges: &[WordCharTreeEdge {
+                                                char_lowercase: 'r',
+                                                idx_range: 11..=11,
+                                                child_node: WordCharTreeNode {
+                                                    word: None,
+                                                    edges: &[WordCharTreeEdge {
+                                                        char_lowercase: 'a',
+                                                        idx_range: 11..=11,
+                                                        child_node: WordCharTreeNode {
+                                                            word: Some(ExampleWords7::Zebra),
+                                                            edges: &[],
+                                                        },
+                                                    }],
+                                                },
+                                            }],
+                                        },
+                                    },
+                                    WordCharTreeEdge {
+                                        char_lowercase: 'r',
+                                        idx_range: 12..=12,
+                                        child_node: WordCharTreeNode {
+                                            word: None,
+                                            edges: &[WordCharTreeEdge {
+                                                char_lowercase: 'o',
+                                                idx_range: 12..=12,
+                                                child_node: WordCharTreeNode {
+                                                    word: Some(ExampleWords7::Zero),
+                                                    edges: &[],
+                                                },
+                                            }],
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                        WordCharTreeEdge {
+                            char_lowercase: 'i',
+                            idx_range: 13..=13,
+                            child_node: WordCharTreeNode {
+                                word: None,
+                                edges: &[WordCharTreeEdge {
+                                    char_lowercase: 'n',
+                                    idx_range: 13..=13,
+                                    child_node: WordCharTreeNode {
+                                        word: None,
+                                        edges: &[WordCharTreeEdge {
+                                            char_lowercase: 'c',
+                                            idx_range: 13..=13,
+                                            child_node: WordCharTreeNode {
+                                                word: Some(ExampleWords7::Zinc),
+                                                edges: &[],
+                                            },
+                                        }],
+                                    },
+                                }],
+                            },
+                        },
+                        WordCharTreeEdge {
+                            char_lowercase: 'o',
+                            idx_range: 14..=15,
+                            child_node: WordCharTreeNode {
+                                word: None,
+                                edges: &[
+                                    WordCharTreeEdge {
+                                        char_lowercase: 'm',
+                                        idx_range: 14..=14,
+                                        child_node: WordCharTreeNode {
+                                            word: None,
+                                            edges: &[WordCharTreeEdge {
+                                                char_lowercase: 'b',
+                                                idx_range: 14..=14,
+                                                child_node: WordCharTreeNode {
+                                                    word: None,
+                                                    edges: &[WordCharTreeEdge {
+                                                        char_lowercase: 'i',
+                                                        idx_range: 14..=14,
+                                                        child_node: WordCharTreeNode {
+                                                            word: None,
+                                                            edges: &[WordCharTreeEdge {
+                                                                char_lowercase: 'e',
+                                                                idx_range: 14..=14,
+                                                                child_node: WordCharTreeNode {
+                                                                    word: Some(
+                                                                        ExampleWords7::Zombie,
+                                                                    ),
+                                                                    edges: &[],
+                                                                },
+                                                            }],
+                                                        },
+                                                    }],
+                                                },
+                                            }],
+                                        },
+                                    },
+                                    WordCharTreeEdge {
+                                        char_lowercase: 'o',
+                                        idx_range: 15..=15,
+                                        child_node: WordCharTreeNode {
+                                            word: Some(ExampleWords7::Zoo),
+                                            edges: &[],
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            },
+        ],
+    };
+
     #[test_case(EXAMPLE_WORDLIST_EMPTY, 0)]
     #[test_case(EXAMPLE_WORDLIST_1, 4)]
     #[test_case(EXAMPLE_WORDLIST_2, 4)]
@@ -509,6 +849,7 @@ mod test {
     #[test_case(EXAMPLE_WORDLIST_4, 2)]
     #[test_case(EXAMPLE_WORDLIST_5, 3)]
     #[test_case(EXAMPLE_WORDLIST_6, 3)]
+    #[test_case(EXAMPLE_WORDLIST_7, 6)]
     fn test_positive_max_depth_value<W>(root: WordCharTreeRootNode<W>, expected_value: usize) {
         assert_eq!(root.get_max_depth(), expected_value);
     }
@@ -520,6 +861,7 @@ mod test {
     #[test_case(EXAMPLE_WORDLIST_4)]
     #[test_case(EXAMPLE_WORDLIST_5)]
     #[test_case(EXAMPLE_WORDLIST_6)]
+    #[test_case(EXAMPLE_WORDLIST_7)]
     fn test_positive_fully_well_formed<W>(root: WordCharTreeRootNode<W>) {
         assert!(root.is_fully_well_formed());
     }
@@ -535,6 +877,7 @@ mod test {
 
     #[test_case(EXAMPLE_WORDLIST_2)]
     #[test_case(EXAMPLE_WORDLIST_6)]
+    #[test_case(EXAMPLE_WORDLIST_7)]
     fn test_negative_suitable_iterative_char_search<W>(root: WordCharTreeRootNode<W>) {
         assert!(!root.is_suitable_for_iterative_char_search());
     }
@@ -546,6 +889,25 @@ mod test {
     #[test_case(EXAMPLE_WORDLIST_4, vec![&ExampleWords4::An])]
     #[test_case(EXAMPLE_WORDLIST_5, vec![&ExampleWords5::Ant])]
     #[test_case(EXAMPLE_WORDLIST_6, vec![&ExampleWords6::A, &ExampleWords6::An, &ExampleWords6::Ant])]
+    #[test_case(EXAMPLE_WORDLIST_7, vec![
+        /* ○ (Root node)             */
+        /* ┣╸a╺○╸n╺○╸t╺●             */ &ExampleWords7::Ant,
+        /* ┃   ┗╸r╺○╸t╺●             */ &ExampleWords7::Art,
+        /* ┣╸i╺●                     */ &ExampleWords7::I,
+        /* ┣╸m╺○╸a╺○╸i╺○╸n╺●         */ &ExampleWords7::Main,
+        /* ┃   ┃   ┣╸n╺●             */ &ExampleWords7::Man,
+        /* ┃   ┃   ┃   ┣╸e╺●         */ &ExampleWords7::Mane,
+        /* ┃   ┃   ┃   ┗╸g╺○╸o╺●     */ &ExampleWords7::Mango,
+        /* ┃   ┃   ┗╸r╺○╸e╺●         */ &ExampleWords7::Mare,
+        /* ┃   ┗╸o╺○╸r╺○╸e╺●         */ &ExampleWords7::More,
+        /* ┣╸x╺○╸r╺○╸a╺○╸m╺●         */ &ExampleWords7::XRAM,
+        /* ┃           ┗╸y╺●         */ &ExampleWords7::XRay,
+        /* ┗╸z╺○╸e╺○╸b╺○╸r╺○╸a╺●     */ &ExampleWords7::Zebra,
+        /*     ┃   ┗╸r╺○╸o╺●         */ &ExampleWords7::Zero,
+        /*     ┣╸i╺○╸n╺○╸c╺●         */ &ExampleWords7::Zinc,
+        /*     ┗╸o╺○╸m╺○╸b╺○╸i╺○╸e╺● */ &ExampleWords7::Zombie,
+        /*         ┗╸o╺●             */ &ExampleWords7::Zoo,
+    ])]
     fn test_positive_words<W>(root: WordCharTreeRootNode<W>, expected_words: Vec<&W>)
     where
         W: std::fmt::Debug + std::cmp::PartialEq,
