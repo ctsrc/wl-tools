@@ -39,17 +39,17 @@ impl<'a, W> Iterator for Iter<'a, W> {
                 if self.curr_edge == self.root.edges.len() {
                     self.curr_node = None;
                     self.curr_node_visitor = None;
-                    return None;
+                    None
                 } else {
                     self.curr_edge += 1;
                     if self.curr_edge == self.root.edges.len() {
                         self.curr_node = None;
                         self.curr_node_visitor = None;
-                        return None;
+                        None
                     } else {
                         let curr_node = &self.root.edges[self.curr_edge].child_node;
                         self.curr_node = Some(curr_node);
-                        let mut curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
+                        let curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
                         self.curr_node_visitor = Some(curr_node_visitor);
                         (self.curr_node_visitor.as_mut().unwrap()).next()
                     }
@@ -112,17 +112,17 @@ impl<'a, W> Iterator for WordCharTreeNodeVisitor<'a, W> {
                 if self.curr_edge == self.node.edges.len() {
                     self.curr_node = None;
                     self.curr_node_visitor = None;
-                    return None;
+                    None
                 } else {
                     self.curr_edge += 1;
                     if self.curr_edge == self.node.edges.len() {
                         self.curr_node = None;
                         self.curr_node_visitor = None;
-                        return None;
+                        None
                     } else {
                         let curr_node = &self.node.edges[self.curr_edge].child_node;
                         self.curr_node = Some(curr_node);
-                        let mut curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
+                        let curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
                         self.curr_node_visitor = Some(Box::new(curr_node_visitor));
                         (self.curr_node_visitor.as_mut().unwrap()).next()
                     }
@@ -199,7 +199,7 @@ impl<W> WordCharTreeRootNode<'_, W> {
             .all(|b| b)
     }
     /// Returns an iterator over the words `W` of a word char tree
-    pub fn words<'a>(&'a self) -> Words<'a, W> {
+    pub fn words(&self) -> Words<W> {
         Words::new(Iter::boxed(self))
     }
 }
@@ -245,15 +245,13 @@ impl<W> WordCharTreeNode<'_, W> {
     fn is_suitable_for_iterative_char_search(&self) -> bool {
         if self.edges.is_empty() {
             true
+        } else if self.word.is_some() {
+            false
         } else {
-            if self.word.is_some() {
-                false
-            } else {
-                self.edges
-                    .iter()
-                    .map(|edge| edge.is_suitable_for_iterative_char_search())
-                    .all(|b| b)
-            }
+            self.edges
+                .iter()
+                .map(|edge| edge.is_suitable_for_iterative_char_search())
+                .all(|b| b)
         }
     }
 }
