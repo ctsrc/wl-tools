@@ -4,6 +4,7 @@ use std::ops::RangeInclusive;
 ///
 /// Regarding the `Option<W>` words in the tree, see in particular the following:
 /// - [`Self::is_fully_well_formed`]
+/// - [`Self::is_suitable_for_iterative_char_search`]
 pub struct WordCharTreeRootNode<'a, W> {
     edges: &'a [WordCharTreeEdge<'a, W>],
 }
