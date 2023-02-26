@@ -1,17 +1,16 @@
-pub struct Words<'a, I, W: 'a>
-where
-    I: Iterator<Item = &'a W>,
-{
-    pub(crate) iter: I,
+/// An iterator over words `W`
+pub struct Words<'a, W: 'a>(Box<dyn Iterator<Item = &'a W> + 'a>);
+
+impl<'a, W> Words<'a, W> {
+    pub fn new(inner_boxed: Box<dyn Iterator<Item = &'a W> + 'a>) -> Self {
+        Self(inner_boxed)
+    }
 }
 
-impl<'a, I, W> Iterator for Words<'a, I, W>
-where
-    I: Iterator<Item = &'a W>,
-{
+impl<'a, W> Iterator for Words<'a, W> {
     type Item = &'a W;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next()
+        self.0.next()
     }
 }

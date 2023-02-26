@@ -1,4 +1,5 @@
 mod tree;
-pub mod words;
+mod words;
 
 pub use tree::*;
+pub use words::*;

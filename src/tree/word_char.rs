@@ -1,9 +1,9 @@
 use std::ops::RangeInclusive;
 
-use crate::words::Words;
+use crate::Words;
 
 /// An iterator over the words of a [`WordCharTreeRootNode`]
-pub struct Iter<'a, W> {
+struct Iter<'a, W> {
     root: &'a WordCharTreeRootNode<'a, W>,
     curr_edge: usize,
     curr_node: Option<&'a WordCharTreeNode<'a, W>>,
@@ -11,7 +11,7 @@ pub struct Iter<'a, W> {
 }
 
 impl<'a, W> Iter<'a, W> {
-    pub fn new(root: &'a WordCharTreeRootNode<'a, W>) -> Self {
+    fn boxed(root: &'a WordCharTreeRootNode<'a, W>) -> Box<Self> {
         let (curr_node, curr_node_visitor) = if root.edges.is_empty() {
             (None, None)
         } else {
@@ -20,12 +20,12 @@ impl<'a, W> Iter<'a, W> {
                 Some(WordCharTreeNodeVisitor::new(&root.edges[0].child_node)),
             )
         };
-        Self {
+        Box::new(Self {
             root,
             curr_edge: 0,
             curr_node,
             curr_node_visitor,
-        }
+        })
     }
 }
 
@@ -199,10 +199,8 @@ impl<W> WordCharTreeRootNode<'_, W> {
             .all(|b| b)
     }
     /// Returns an iterator over the words `W` of a word char tree
-    pub fn words(&self) -> Words<Iter<W>, W> {
-        Words {
-            iter: Iter::new(self),
-        }
+    pub fn words<'a>(&'a self) -> Words<'a, W> {
+        Words::new(Iter::boxed(self))
     }
 }
 
