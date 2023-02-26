@@ -1,0 +1,18 @@
+[package]
+name = "wl-tools"
+description = "Wordlist tools – algorithms and data structures for working with lists of words"
+license = "ISC"
+readme = "README.md"
+repository = "https://github.com/ctsrc/wl-tools"
+version = "0.0.0-alpha.1"
+authors = ["Erik Nordstrøm <erik@nordstroem.no>"]
+categories = ["algorithms", "data-structures", "text-processing", "mathematics", "science"]
+edition = "2021"
+
+[features]
+default = []
+
+[dependencies]
+
+[dev-dependencies]
+test-case = { version = "2", default-features = false}

@@ -1,0 +1,3 @@
+/target
+# ignore Cargo.lock because this is a lib crate
+/Cargo.lock
