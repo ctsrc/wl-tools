@@ -42,6 +42,7 @@ impl<'a, W> Iterator for WordCharTreeRootNodeVisitor<'a, W> {
 struct WordCharTreeNodeVisitor<'a, W> {
     node: &'a WordCharTreeNode<'a, W>,
     has_visited_own_node: bool,
+    has_visited_children: bool,
     curr_edge: usize,
     curr_node: Option<&'a WordCharTreeNode<'a, W>>,
     curr_node_visitor: Option<Box<WordCharTreeNodeVisitor<'a, W>>>,
@@ -52,9 +53,10 @@ impl<'a, W> WordCharTreeNodeVisitor<'a, W> {
         Self {
             node,
             has_visited_own_node: false,
+            has_visited_children: false,
             curr_edge: 0,
-            curr_node: None,         // TODO: init
-            curr_node_visitor: None, // TODO: init
+            curr_node: None,
+            curr_node_visitor: None,
         }
     }
 }
@@ -69,6 +71,12 @@ impl<'a, W> Iterator for WordCharTreeNodeVisitor<'a, W> {
             if self.node.word.is_some() {
                 return self.node.word.as_ref();
             }
+        }
+
+        if !self.has_visited_children {
+            self.has_visited_children = true;
+            self.curr_node = todo!();
+            self.curr_node_visitor = todo!();
         }
 
         None
