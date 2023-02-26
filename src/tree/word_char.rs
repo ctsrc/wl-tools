@@ -16,8 +16,6 @@ impl<W> WordCharTreeRootNode<'_, W> {
     ///
     /// In a [fully well-formed](`Self::is_fully_well_formed`) word char tree, this depth
     /// corresponds to the length in `char`s of the longest word in the tree.
-    ///
-    /// [`char`]: prim@char
     pub fn get_max_depth(&self) -> usize {
         self.edges
             .iter()
