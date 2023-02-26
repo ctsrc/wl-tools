@@ -1,5 +1,100 @@
 use std::ops::RangeInclusive;
 
+use crate::words::Words;
+
+/// An iterator over the words of a [`WordCharTreeRootNode`]
+pub struct Iter<'a, W> {
+    root_visitor: WordCharTreeRootNodeVisitor<'a, W>,
+}
+
+struct WordCharTreeRootNodeVisitor<'a, W> {
+    root: &'a WordCharTreeRootNode<'a, W>,
+    curr_edge: usize,
+    curr_node: Option<&'a WordCharTreeNode<'a, W>>,
+    curr_node_visitor: Option<WordCharTreeNodeVisitor<'a, W>>,
+}
+
+impl<'a, W> Iterator for WordCharTreeRootNodeVisitor<'a, W> {
+    type Item = &'a W;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let Some(visitor) = &mut self.curr_node_visitor else { return None };
+        match visitor.next() {
+            None => {
+                if self.curr_edge == self.root.edges.len() {
+                    self.curr_node = None;
+                    self.curr_node_visitor = None;
+                    return None;
+                } else {
+                    self.curr_edge += 1;
+                    let curr_node = &self.root.edges[self.curr_edge].child_node;
+                    self.curr_node = Some(curr_node);
+                    let mut curr_node_visitor = WordCharTreeNodeVisitor::from(&curr_node);
+                    self.curr_node_visitor = Some(curr_node_visitor);
+                    (self.curr_node_visitor.as_mut().unwrap()).next()
+                }
+            }
+            Some(w) => Some(w),
+        }
+    }
+}
+
+struct WordCharTreeNodeVisitor<'a, W> {
+    node: &'a WordCharTreeNode<'a, W>,
+    has_visited_own_node: bool,
+    curr_edge: usize,
+    curr_node: Option<&'a WordCharTreeNode<'a, W>>,
+    curr_node_visitor: Option<Box<WordCharTreeNodeVisitor<'a, W>>>,
+}
+
+impl<'a, W> WordCharTreeNodeVisitor<'a, W> {
+    fn from(node: &'a WordCharTreeNode<'a, W>) -> Self {
+        Self {
+            node,
+            has_visited_own_node: false,
+            curr_edge: 0,
+            curr_node: None,         // TODO: init
+            curr_node_visitor: None, // TODO: init
+        }
+    }
+}
+
+impl<'a, W> Iterator for WordCharTreeNodeVisitor<'a, W> {
+    type Item = &'a W;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Visit own node before visiting children
+        if !self.has_visited_own_node {
+            self.has_visited_own_node = true;
+            if self.node.word.is_some() {
+                return self.node.word.as_ref();
+            }
+        }
+
+        None
+        /*
+        let Some(visitor) = &mut self.curr_node_visitor else { return None };
+        match visitor.next() {
+            None => {
+                if self.curr_edge == self.node.edges.len() {
+                    self.curr_node = None;
+                    self.curr_node_visitor = None;
+                    return None;
+                } else {
+                    self.curr_edge += 1;
+                    let curr_node = &self.root.edges[self.curr_edge].child_node;
+                    self.curr_node = Some(curr_node);
+                    let mut curr_node_visitor = WordCharTreeNodeVisitor { node: &curr_node };
+                    self.curr_node_visitor = Some(curr_node_visitor);
+                    (self.curr_node_visitor.as_mut().unwrap()).next()
+                }
+            }
+            Some(w) => Some(w),
+        }
+         */
+    }
+}
+
 /// The root node of a tree, where the edges are [`char`]s and the nodes are `Option<W>` words
 ///
 /// Regarding the `Option<W>` words in the tree, see in particular the following:
@@ -64,6 +159,14 @@ impl<W> WordCharTreeRootNode<'_, W> {
             .map(|edge| edge.is_suitable_for_iterative_char_search())
             .all(|b| b)
     }
+    /*
+    /// Returns an iterator over the words `W` of a word char tree
+    pub fn words(&self) -> Words<Iter, W> {
+        Words {
+            iter: self.edges.iter(),
+        }
+    }
+     */
 }
 
 struct WordCharTreeEdge<'a, W> {
