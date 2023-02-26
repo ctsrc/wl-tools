@@ -4,17 +4,32 @@ use crate::words::Words;
 
 /// An iterator over the words of a [`WordCharTreeRootNode`]
 pub struct Iter<'a, W> {
-    root_visitor: WordCharTreeRootNodeVisitor<'a, W>,
-}
-
-struct WordCharTreeRootNodeVisitor<'a, W> {
     root: &'a WordCharTreeRootNode<'a, W>,
     curr_edge: usize,
     curr_node: Option<&'a WordCharTreeNode<'a, W>>,
     curr_node_visitor: Option<WordCharTreeNodeVisitor<'a, W>>,
 }
 
-impl<'a, W> Iterator for WordCharTreeRootNodeVisitor<'a, W> {
+impl<'a, W> Iter<'a, W> {
+    pub fn new(root: &'a WordCharTreeRootNode<'a, W>) -> Self {
+        let (curr_node, curr_node_visitor) = if root.edges.is_empty() {
+            (None, None)
+        } else {
+            (
+                Some(&root.edges[0].child_node),
+                Some(WordCharTreeNodeVisitor::new(&root.edges[0].child_node)),
+            )
+        };
+        Self {
+            root,
+            curr_edge: 0,
+            curr_node,
+            curr_node_visitor,
+        }
+    }
+}
+
+impl<'a, W> Iterator for Iter<'a, W> {
     type Item = &'a W;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -27,11 +42,17 @@ impl<'a, W> Iterator for WordCharTreeRootNodeVisitor<'a, W> {
                     return None;
                 } else {
                     self.curr_edge += 1;
-                    let curr_node = &self.root.edges[self.curr_edge].child_node;
-                    self.curr_node = Some(curr_node);
-                    let mut curr_node_visitor = WordCharTreeNodeVisitor::from(&curr_node);
-                    self.curr_node_visitor = Some(curr_node_visitor);
-                    (self.curr_node_visitor.as_mut().unwrap()).next()
+                    if self.curr_edge == self.root.edges.len() {
+                        self.curr_node = None;
+                        self.curr_node_visitor = None;
+                        return None;
+                    } else {
+                        let curr_node = &self.root.edges[self.curr_edge].child_node;
+                        self.curr_node = Some(curr_node);
+                        let mut curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
+                        self.curr_node_visitor = Some(curr_node_visitor);
+                        (self.curr_node_visitor.as_mut().unwrap()).next()
+                    }
                 }
             }
             Some(w) => Some(w),
@@ -49,7 +70,7 @@ struct WordCharTreeNodeVisitor<'a, W> {
 }
 
 impl<'a, W> WordCharTreeNodeVisitor<'a, W> {
-    fn from(node: &'a WordCharTreeNode<'a, W>) -> Self {
+    fn new(node: &'a WordCharTreeNode<'a, W>) -> Self {
         Self {
             node,
             has_visited_own_node: false,
@@ -75,12 +96,16 @@ impl<'a, W> Iterator for WordCharTreeNodeVisitor<'a, W> {
 
         if !self.has_initialized_children {
             self.has_initialized_children = true;
-            self.curr_node = todo!();
-            self.curr_node_visitor = todo!();
+            if self.node.edges.is_empty() {
+                self.curr_node = None;
+                self.curr_node_visitor = None;
+            } else {
+                let curr_node = &self.node.edges[0].child_node;
+                self.curr_node = Some(curr_node);
+                self.curr_node_visitor = Some(Box::new(WordCharTreeNodeVisitor::new(curr_node)));
+            }
         }
 
-        None
-        /*
         let Some(visitor) = &mut self.curr_node_visitor else { return None };
         match visitor.next() {
             None => {
@@ -90,16 +115,21 @@ impl<'a, W> Iterator for WordCharTreeNodeVisitor<'a, W> {
                     return None;
                 } else {
                     self.curr_edge += 1;
-                    let curr_node = &self.root.edges[self.curr_edge].child_node;
-                    self.curr_node = Some(curr_node);
-                    let mut curr_node_visitor = WordCharTreeNodeVisitor { node: &curr_node };
-                    self.curr_node_visitor = Some(curr_node_visitor);
-                    (self.curr_node_visitor.as_mut().unwrap()).next()
+                    if self.curr_edge == self.node.edges.len() {
+                        self.curr_node = None;
+                        self.curr_node_visitor = None;
+                        return None;
+                    } else {
+                        let curr_node = &self.node.edges[self.curr_edge].child_node;
+                        self.curr_node = Some(curr_node);
+                        let mut curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
+                        self.curr_node_visitor = Some(Box::new(curr_node_visitor));
+                        (self.curr_node_visitor.as_mut().unwrap()).next()
+                    }
                 }
             }
             Some(w) => Some(w),
         }
-         */
     }
 }
 
@@ -167,14 +197,12 @@ impl<W> WordCharTreeRootNode<'_, W> {
             .map(|edge| edge.is_suitable_for_iterative_char_search())
             .all(|b| b)
     }
-    /*
     /// Returns an iterator over the words `W` of a word char tree
-    pub fn words(&self) -> Words<Iter, W> {
+    pub fn words(&self) -> Words<Iter<W>, W> {
         Words {
-            iter: self.edges.iter(),
+            iter: Iter::new(self),
         }
     }
-     */
 }
 
 struct WordCharTreeEdge<'a, W> {
@@ -197,35 +225,36 @@ impl<W> WordCharTreeEdge<'_, W> {
 
 struct WordCharTreeNode<'a, W> {
     word: Option<W>,
-    edges: Option<&'a [WordCharTreeEdge<'a, W>]>,
+    edges: &'a [WordCharTreeEdge<'a, W>],
 }
 
 impl<W> WordCharTreeNode<'_, W> {
     fn get_max_depth(&self, depth_at_parent_edge: usize) -> usize {
         let curr_depth = depth_at_parent_edge + 1;
-        let Some(edges) = self.edges else { return curr_depth };
-        edges
+        self.edges
             .iter()
             .map(|edge| edge.get_max_depth(curr_depth))
             .max()
             .unwrap_or(curr_depth)
     }
     fn is_fully_well_formed(&self) -> bool {
-        let Some(edges) = self.edges else { return self.word.is_some() };
-        edges
+        self.edges
             .iter()
             .map(|edge| edge.is_fully_well_formed())
             .all(|b| b)
     }
     fn is_suitable_for_iterative_char_search(&self) -> bool {
-        let Some(edges) = self.edges else { return true };
-        if self.word.is_some() {
-            false
+        if self.edges.is_empty() {
+            true
         } else {
-            edges
-                .iter()
-                .map(|edge| edge.is_suitable_for_iterative_char_search())
-                .all(|b| b)
+            if self.word.is_some() {
+                false
+            } else {
+                self.edges
+                    .iter()
+                    .map(|edge| edge.is_suitable_for_iterative_char_search())
+                    .all(|b| b)
+            }
         }
     }
 }
@@ -235,16 +264,40 @@ mod test {
     use super::*;
     use test_case::test_case;
 
+    #[derive(Debug, PartialEq)]
     pub enum ExampleWords1 {
         Get,
         Give,
         Go,
     }
 
+    #[derive(Debug, PartialEq)]
     pub enum ExampleWords2 {
         Arm,
         Army,
         Man,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub enum ExampleWords3 {
+        A,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub enum ExampleWords4 {
+        An,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub enum ExampleWords5 {
+        Ant,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub enum ExampleWords6 {
+        A,
+        An,
+        Ant,
     }
 
     /// A well-formed example empty wordlist
@@ -260,20 +313,20 @@ mod test {
             idx_range: 0..=2,
             child_node: WordCharTreeNode {
                 word: None,
-                edges: Some(&[
+                edges: &[
                     WordCharTreeEdge {
                         char_lowercase: 'e',
                         idx_range: 0..=0,
                         child_node: WordCharTreeNode {
                             word: None,
-                            edges: Some(&[WordCharTreeEdge {
+                            edges: &[WordCharTreeEdge {
                                 char_lowercase: 't',
                                 idx_range: 0..=0,
                                 child_node: WordCharTreeNode {
                                     word: Some(ExampleWords1::Get),
-                                    edges: None,
+                                    edges: &[],
                                 },
-                            }]),
+                            }],
                         },
                     },
                     WordCharTreeEdge {
@@ -281,21 +334,21 @@ mod test {
                         idx_range: 1..=1,
                         child_node: WordCharTreeNode {
                             word: None,
-                            edges: Some(&[WordCharTreeEdge {
+                            edges: &[WordCharTreeEdge {
                                 char_lowercase: 'v',
                                 idx_range: 1..=1,
                                 child_node: WordCharTreeNode {
                                     word: None,
-                                    edges: Some(&[WordCharTreeEdge {
+                                    edges: &[WordCharTreeEdge {
                                         char_lowercase: 'e',
                                         idx_range: 1..=1,
                                         child_node: WordCharTreeNode {
                                             word: Some(ExampleWords1::Give),
-                                            edges: None,
+                                            edges: &[],
                                         },
-                                    }]),
+                                    }],
                                 },
-                            }]),
+                            }],
                         },
                     },
                     WordCharTreeEdge {
@@ -303,10 +356,10 @@ mod test {
                         idx_range: 2..=2,
                         child_node: WordCharTreeNode {
                             word: Some(ExampleWords1::Go),
-                            edges: None,
+                            edges: &[],
                         },
                     },
-                ]),
+                ],
             },
         }],
     };
@@ -320,28 +373,28 @@ mod test {
                 idx_range: 0..=1,
                 child_node: WordCharTreeNode {
                     word: None,
-                    edges: Some(&[WordCharTreeEdge {
+                    edges: &[WordCharTreeEdge {
                         char_lowercase: 'r',
                         idx_range: 0..=1,
                         child_node: WordCharTreeNode {
                             word: None,
-                            edges: Some(&[WordCharTreeEdge {
+                            edges: &[WordCharTreeEdge {
                                 char_lowercase: 'm',
                                 idx_range: 0..=1,
                                 child_node: WordCharTreeNode {
                                     word: Some(ExampleWords2::Arm),
-                                    edges: Some(&[WordCharTreeEdge {
+                                    edges: &[WordCharTreeEdge {
                                         char_lowercase: 'y',
                                         idx_range: 1..=1,
                                         child_node: WordCharTreeNode {
                                             word: Some(ExampleWords2::Army),
-                                            edges: None,
+                                            edges: &[],
                                         },
-                                    }]),
+                                    }],
                                 },
-                            }]),
+                            }],
                         },
-                    }]),
+                    }],
                 },
             },
             WordCharTreeEdge {
@@ -349,46 +402,161 @@ mod test {
                 idx_range: 2..=2,
                 child_node: WordCharTreeNode {
                     word: None,
-                    edges: Some(&[WordCharTreeEdge {
+                    edges: &[WordCharTreeEdge {
                         char_lowercase: 'a',
                         idx_range: 2..=2,
                         child_node: WordCharTreeNode {
                             word: None,
-                            edges: Some(&[WordCharTreeEdge {
+                            edges: &[WordCharTreeEdge {
                                 char_lowercase: 'n',
                                 idx_range: 2..=2,
                                 child_node: WordCharTreeNode {
                                     word: Some(ExampleWords2::Man),
-                                    edges: None,
+                                    edges: &[],
                                 },
-                            }]),
+                            }],
                         },
-                    }]),
+                    }],
                 },
             },
         ],
     };
 
+    /// A well-formed example wordlist
+    /// Suitable for iterative char search
+    pub const EXAMPLE_WORDLIST_3: WordCharTreeRootNode<ExampleWords3> = WordCharTreeRootNode {
+        edges: &[WordCharTreeEdge {
+            char_lowercase: 'a',
+            idx_range: 0..=0,
+            child_node: WordCharTreeNode {
+                word: Some(ExampleWords3::A),
+                edges: &[],
+            },
+        }],
+    };
+
+    /// A well-formed example wordlist
+    /// Suitable for iterative char search
+    pub const EXAMPLE_WORDLIST_4: WordCharTreeRootNode<ExampleWords4> = WordCharTreeRootNode {
+        edges: &[WordCharTreeEdge {
+            char_lowercase: 'a',
+            idx_range: 0..=0,
+            child_node: WordCharTreeNode {
+                word: None,
+                edges: &[WordCharTreeEdge {
+                    char_lowercase: 'n',
+                    idx_range: 0..=0,
+                    child_node: WordCharTreeNode {
+                        word: Some(ExampleWords4::An),
+                        edges: &[],
+                    },
+                }],
+            },
+        }],
+    };
+
+    /// A well-formed example wordlist
+    /// Suitable for iterative char search
+    pub const EXAMPLE_WORDLIST_5: WordCharTreeRootNode<ExampleWords5> = WordCharTreeRootNode {
+        edges: &[WordCharTreeEdge {
+            char_lowercase: 'a',
+            idx_range: 0..=0,
+            child_node: WordCharTreeNode {
+                word: None,
+                edges: &[WordCharTreeEdge {
+                    char_lowercase: 'n',
+                    idx_range: 0..=0,
+                    child_node: WordCharTreeNode {
+                        word: None,
+                        edges: &[WordCharTreeEdge {
+                            char_lowercase: 't',
+                            idx_range: 0..=0,
+                            child_node: WordCharTreeNode {
+                                word: Some(ExampleWords5::Ant),
+                                edges: &[],
+                            },
+                        }],
+                    },
+                }],
+            },
+        }],
+    };
+
+    /// A well-formed example wordlist
+    /// Not suitable for iterative char search
+    pub const EXAMPLE_WORDLIST_6: WordCharTreeRootNode<ExampleWords6> = WordCharTreeRootNode {
+        edges: &[WordCharTreeEdge {
+            char_lowercase: 'a',
+            idx_range: 0..=2,
+            child_node: WordCharTreeNode {
+                word: Some(ExampleWords6::A),
+                edges: &[WordCharTreeEdge {
+                    char_lowercase: 'n',
+                    idx_range: 1..=2,
+                    child_node: WordCharTreeNode {
+                        word: Some(ExampleWords6::An),
+                        edges: &[WordCharTreeEdge {
+                            char_lowercase: 't',
+                            idx_range: 2..=2,
+                            child_node: WordCharTreeNode {
+                                word: Some(ExampleWords6::Ant),
+                                edges: &[],
+                            },
+                        }],
+                    },
+                }],
+            },
+        }],
+    };
+
     #[test_case(EXAMPLE_WORDLIST_EMPTY, 0)]
     #[test_case(EXAMPLE_WORDLIST_1, 4)]
+    #[test_case(EXAMPLE_WORDLIST_2, 4)]
+    #[test_case(EXAMPLE_WORDLIST_3, 1)]
+    #[test_case(EXAMPLE_WORDLIST_4, 2)]
+    #[test_case(EXAMPLE_WORDLIST_5, 3)]
+    #[test_case(EXAMPLE_WORDLIST_6, 3)]
     fn test_positive_max_depth_value<W>(root: WordCharTreeRootNode<W>, expected_value: usize) {
         assert_eq!(root.get_max_depth(), expected_value);
     }
 
     #[test_case(EXAMPLE_WORDLIST_EMPTY)]
     #[test_case(EXAMPLE_WORDLIST_1)]
-    fn test_positive_well_formed<W>(root: WordCharTreeRootNode<W>) {
+    #[test_case(EXAMPLE_WORDLIST_2)]
+    #[test_case(EXAMPLE_WORDLIST_3)]
+    #[test_case(EXAMPLE_WORDLIST_4)]
+    #[test_case(EXAMPLE_WORDLIST_5)]
+    #[test_case(EXAMPLE_WORDLIST_6)]
+    fn test_positive_fully_well_formed<W>(root: WordCharTreeRootNode<W>) {
         assert!(root.is_fully_well_formed());
     }
 
     #[test_case(EXAMPLE_WORDLIST_EMPTY)]
     #[test_case(EXAMPLE_WORDLIST_1)]
+    #[test_case(EXAMPLE_WORDLIST_3)]
+    #[test_case(EXAMPLE_WORDLIST_4)]
+    #[test_case(EXAMPLE_WORDLIST_5)]
     fn test_positive_suitable_iterative_char_search<W>(root: WordCharTreeRootNode<W>) {
         assert!(root.is_suitable_for_iterative_char_search());
     }
 
     #[test_case(EXAMPLE_WORDLIST_2)]
+    #[test_case(EXAMPLE_WORDLIST_6)]
     fn test_negative_suitable_iterative_char_search<W>(root: WordCharTreeRootNode<W>) {
         assert!(!root.is_suitable_for_iterative_char_search());
+    }
+
+    #[test_case(EXAMPLE_WORDLIST_EMPTY, vec![])]
+    #[test_case(EXAMPLE_WORDLIST_1, vec![&ExampleWords1::Get, &ExampleWords1::Give, &ExampleWords1::Go])]
+    #[test_case(EXAMPLE_WORDLIST_2, vec![&ExampleWords2::Arm, &ExampleWords2::Army, &ExampleWords2::Man])]
+    #[test_case(EXAMPLE_WORDLIST_3, vec![&ExampleWords3::A])]
+    #[test_case(EXAMPLE_WORDLIST_4, vec![&ExampleWords4::An])]
+    #[test_case(EXAMPLE_WORDLIST_5, vec![&ExampleWords5::Ant])]
+    #[test_case(EXAMPLE_WORDLIST_6, vec![&ExampleWords6::A, &ExampleWords6::An, &ExampleWords6::Ant])]
+    fn test_positive_words<W>(root: WordCharTreeRootNode<W>, expected_words: Vec<&W>)
+    where
+        W: std::fmt::Debug + std::cmp::PartialEq,
+    {
+        assert_eq!(root.words().collect::<Vec<_>>(), expected_words);
     }
 }
