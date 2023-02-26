@@ -36,24 +36,22 @@ impl<'a, W> Iterator for Iter<'a, W> {
         let Some(visitor) = &mut self.curr_node_visitor else { return None };
         match visitor.next() {
             None => {
+                // Proceed to next edge unless we've already reached the end of the edges.
+                if self.curr_edge < self.root.edges.len() {
+                    self.curr_edge += 1;
+                }
+                // If there are no edges left, we signal end of iteration.
                 if self.curr_edge == self.root.edges.len() {
                     self.curr_node = None;
                     self.curr_node_visitor = None;
-                    None
-                } else {
-                    self.curr_edge += 1;
-                    if self.curr_edge == self.root.edges.len() {
-                        self.curr_node = None;
-                        self.curr_node_visitor = None;
-                        None
-                    } else {
-                        let curr_node = &self.root.edges[self.curr_edge].child_node;
-                        self.curr_node = Some(curr_node);
-                        let curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
-                        self.curr_node_visitor = Some(curr_node_visitor);
-                        (self.curr_node_visitor.as_mut().unwrap()).next()
-                    }
+                    return None;
                 }
+
+                let curr_node = &self.root.edges[self.curr_edge].child_node;
+                self.curr_node = Some(curr_node);
+                let curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
+                self.curr_node_visitor = Some(curr_node_visitor);
+                (self.curr_node_visitor.as_mut().unwrap()).next()
             }
             Some(w) => Some(w),
         }
@@ -109,24 +107,22 @@ impl<'a, W> Iterator for WordCharTreeNodeVisitor<'a, W> {
         let Some(visitor) = &mut self.curr_node_visitor else { return None };
         match visitor.next() {
             None => {
+                // Proceed to next edge unless we've already reached the end of the edges.
+                if self.curr_edge < self.node.edges.len() {
+                    self.curr_edge += 1;
+                }
+                // If there are no edges left, signal to parent that subtree is done.
                 if self.curr_edge == self.node.edges.len() {
                     self.curr_node = None;
                     self.curr_node_visitor = None;
-                    None
-                } else {
-                    self.curr_edge += 1;
-                    if self.curr_edge == self.node.edges.len() {
-                        self.curr_node = None;
-                        self.curr_node_visitor = None;
-                        None
-                    } else {
-                        let curr_node = &self.node.edges[self.curr_edge].child_node;
-                        self.curr_node = Some(curr_node);
-                        let curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
-                        self.curr_node_visitor = Some(Box::new(curr_node_visitor));
-                        (self.curr_node_visitor.as_mut().unwrap()).next()
-                    }
+                    return None;
                 }
+
+                let curr_node = &self.node.edges[self.curr_edge].child_node;
+                self.curr_node = Some(curr_node);
+                let curr_node_visitor = WordCharTreeNodeVisitor::new(curr_node);
+                self.curr_node_visitor = Some(Box::new(curr_node_visitor));
+                (self.curr_node_visitor.as_mut().unwrap()).next()
             }
             Some(w) => Some(w),
         }
